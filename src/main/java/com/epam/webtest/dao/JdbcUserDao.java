@@ -20,13 +20,13 @@ public class JdbcUserDao implements UserDao {
 
     @Override
     public User findByEmail(String email) {
-        String sql = "SELECT email, password, enabled FROM users WHERE email = " + email;
+        String sql = "SELECT email, password, enabled FROM users WHERE email = \'" + email + "\'";
         return jdbcTemplate.query(sql, new ResultSetExtractor<User>() {
             @Override
             public User extractData(ResultSet resultSet) throws SQLException, DataAccessException {
                 if (resultSet.next()) {
                     User user = new User();
-                    user.setEmail(resultSet.getString("email"));
+                    user.setEmail(email);
                     user.setPassword(resultSet.getString("password"));
                     user.setEnabled(resultSet.getShort("enabled"));
                     return user;

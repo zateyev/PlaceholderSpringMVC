@@ -5,12 +5,14 @@ import com.epam.webtest.domain.Pack;
 import com.epam.webtest.domain.User;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 
 import javax.sql.DataSource;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.List;
 
 public class JdbcPackDao implements PackDao {
@@ -46,8 +48,8 @@ public class JdbcPackDao implements PackDao {
 
     @Override
     public List<Pack> findByUser(User user) {
-        String sql = "SELECT id, name, location FROM pack WHERE user_email=" + user.getEmail();
-        List<Pack> packs = jdbcTemplate.query(sql, new RowMapper<Pack>() {
+        String sql = "SELECT id, name, location FROM pack WHERE user_email= \'" + user.getEmail() + "\'";
+        return jdbcTemplate.query(sql, new RowMapper<Pack>() {
             @Override
             public Pack mapRow(ResultSet resultSet, int i) throws SQLException {
                 Pack pack = new Pack();
@@ -58,7 +60,6 @@ public class JdbcPackDao implements PackDao {
                 return pack;
             }
         });
-        return packs;
     }
 
     @Override
@@ -73,9 +74,22 @@ public class JdbcPackDao implements PackDao {
     }
 
     @Override
-    public void insert(Pack pack) {
+    public Pack insert(Pack pack) {
         String sql = "INSERT INTO pack (id, name, user_email, location) VALUES (DEFAULT, ?, ?, ?)";
-        jdbcTemplate.update(sql, pack.getName(), pack.getUser().getEmail(), pack.getLocation());
+        KeyHolder holder = new GeneratedKeyHolder();
+        jdbcTemplate.update(new PreparedStatementCreator() {
+            @Override
+            public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
+                PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                ps.setString(1, pack.getName());
+                ps.setString(2, pack.getUser().getEmail());
+                ps.setString(3, pack.getLocation());
+                return ps;
+            }
+        }, holder);
+        Long newPackId = holder.getKey().longValue();
+        pack.setId(newPackId);
+        return pack;
     }
 
     @Override

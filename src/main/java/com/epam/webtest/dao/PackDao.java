@@ -11,7 +11,7 @@ public interface PackDao {
     List<Pack> findByUser(User user);
     void update(Pack pack);
     Pack save(Pack pack);
-    void insert(Pack pack);
+    Pack insert(Pack pack);
     boolean remove(Pack pack);
     void removeById(Long id);
 }

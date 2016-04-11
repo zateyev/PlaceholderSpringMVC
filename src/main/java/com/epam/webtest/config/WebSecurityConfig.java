@@ -19,15 +19,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public void configAuthentication(AuthenticationManagerBuilder auth) throws Exception {
         auth.jdbcAuthentication().dataSource(dataSource)
                 .usersByUsernameQuery(
-                        "select email, password, enabled from users where email=?")
+                        "SELECT email, password, enabled FROM users WHERE email=?")
                 .authoritiesByUsernameQuery(
-                        "select email, role from user_roles where email=?");
+                        "SELECT email, role FROM user_roles WHERE email=?");
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/admin/**").access("hasRole('ROLE_ADMIN')")
+                .antMatchers("/my-packs", "/create-pack", "/generated-form").access("hasRole('ROLE_USER')")
                 .and()
                 .formLogin().loginPage("/login").loginProcessingUrl("/j_spring_security_check").failureUrl("/login?error")
                 .usernameParameter("username").passwordParameter("password")

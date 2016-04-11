@@ -50,9 +50,9 @@
         <div class="msg">${msg}</div>
     </c:if>
 
-    <c:url value="/j_spring_security_check" var="loginUrl" />
+    <c:url value="/j_spring_security_check" var="loginPage" />
     <form name='loginForm'
-          action="${loginUrl}" method='POST'>
+          action="${loginPage}" method='POST'>
 
         <table>
             <tr>

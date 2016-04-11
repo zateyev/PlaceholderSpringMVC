@@ -33,7 +33,7 @@ public class WebConfig extends WebMvcConfigurerAdapter {
     public static PropertyPlaceholderConfigurer properties() {
         PropertyPlaceholderConfigurer ppc = new PropertyPlaceholderConfigurer();
         ClassPathResource[] resources = new ClassPathResource[]
-                {new ClassPathResource("db.properties")};
+                {new ClassPathResource("app.properties")};
         ppc.setLocations(resources);
         ppc.setIgnoreUnresolvablePlaceholders(true);
         return ppc;
@@ -51,7 +51,14 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/WEB-INF/pages/**").addResourceLocations("/pages/");
+        if (!registry.hasMappingForPattern("/webjars/**")) {
+            registry.addResourceHandler("/webjars/**")
+                    .addResourceLocations("classpath:/META-INF/resources/webjars/");
+        }
+        if (!registry.hasMappingForPattern("/static/**")) {
+            registry.addResourceHandler("/static/**")
+                    .addResourceLocations("/static/");
+        }
     }
 
     @Bean

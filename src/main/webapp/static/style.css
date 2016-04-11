@@ -1,0 +1,50 @@
+.form
+{
+    width: 445px;
+    height: auto;
+    padding-bottom: 20px;
+    margin: 0 auto;
+    background-color: #4c4c4c;
+    border-radius: 3px;
+    text-align: center;
+}
+.form label, .form input, .form button
+{
+    display: block;
+    width: 415px;
+    height: 60px;
+    margin: 0 auto;
+}
+.form label
+{
+    font: 18px Verdana;
+    font-weight: bold;
+    color: #fff;
+    text-transform: uppercase;
+    line-height: 60px;
+}
+.form input
+{
+    border-radius: 3px;
+    border: none;
+    font: 18px Verdana;
+    text-align: center;
+    color: #4c4c4c;
+    margin-bottom: 12px;
+}
+.form button
+{
+    margin-top: 30px;
+    border: none;
+    border-radius: 3px;
+    background: #7ecefd;
+    font: 22px Verdana;
+    font-weight: bold;
+    color: #fff;
+    text-transform: uppercase;
+    border-bottom: 2px solid #6aadd4;
+}
+.form button:hover
+{
+    cursor: pointer;
+}
