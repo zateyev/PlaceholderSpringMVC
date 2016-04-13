@@ -7,8 +7,6 @@ public class Actionfactory {
         String method = request.getMethod();
         String action = request.getRequestURI().substring(request.getContextPath().length());
         switch (method + action) {
-            case "POST/upload":
-                return new UploadAction(request);
             case "GET/form":
                 return new FormGenerateAction(request);
             default:

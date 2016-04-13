@@ -2,7 +2,6 @@ package com.epam.webtest.dao;
 
 
 import com.epam.webtest.domain.Pack;
-import com.epam.webtest.domain.User;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -47,8 +46,8 @@ public class JdbcPackDao implements PackDao {
     }
 
     @Override
-    public List<Pack> findByUser(User user) {
-        String sql = "SELECT id, name, location FROM pack WHERE user_email= \'" + user.getEmail() + "\'";
+    public List<Pack> findByUsername(String username) {
+        String sql = "SELECT id, name, location FROM pack WHERE user_email= \'" + username + "\'";
         return jdbcTemplate.query(sql, new RowMapper<Pack>() {
             @Override
             public Pack mapRow(ResultSet resultSet, int i) throws SQLException {
@@ -56,7 +55,7 @@ public class JdbcPackDao implements PackDao {
                 pack.setId(resultSet.getLong("id"));
                 pack.setName(resultSet.getString("name"));
                 pack.setLocation(resultSet.getString("location"));
-                pack.setUser(user);
+                pack.setUsername(username);
                 return pack;
             }
         });
@@ -65,7 +64,7 @@ public class JdbcPackDao implements PackDao {
     @Override
     public void update(Pack pack) {
         String sql = "UPDATE pack SET name=?, user_email=?, location=? WHERE id=?";
-        jdbcTemplate.update(sql, pack.getName(), pack.getUser().getEmail(), pack.getLocation(), pack.getId());
+        jdbcTemplate.update(sql, pack.getName(), pack.getUsername(), pack.getLocation(), pack.getId());
     }
 
     @Override
@@ -82,7 +81,7 @@ public class JdbcPackDao implements PackDao {
             public PreparedStatement createPreparedStatement(Connection connection) throws SQLException {
                 PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
                 ps.setString(1, pack.getName());
-                ps.setString(2, pack.getUser().getEmail());
+                ps.setString(2, pack.getUsername());
                 ps.setString(3, pack.getLocation());
                 return ps;
             }

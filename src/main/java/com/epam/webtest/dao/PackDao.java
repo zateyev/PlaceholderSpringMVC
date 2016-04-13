@@ -8,7 +8,7 @@ import java.util.List;
 public interface PackDao {
     Pack findById(Long id);
     Pack findByName(String name);
-    List<Pack> findByUser(User user);
+    List<Pack> findByUsername(String username);
     void update(Pack pack);
     Pack save(Pack pack);
     Pack insert(Pack pack);

@@ -2,29 +2,39 @@ package com.epam.webtest.controller;
 
 import com.epam.webtest.controller.action.Action;
 import com.epam.webtest.controller.action.Actionfactory;
+import com.epam.webtest.dao.DocumentDao;
 import com.epam.webtest.dao.PackDao;
-import com.epam.webtest.dao.UserDao;
+import com.epam.webtest.domain.Document;
 import com.epam.webtest.domain.Pack;
-import com.epam.webtest.domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 public class HelloController {
 
     @Autowired
-    private UserDao userDao;
+    private DocumentDao documentDao;
 
     @Autowired
     private PackDao packDao;
@@ -83,27 +93,78 @@ public class HelloController {
 
     @RequestMapping(value = "/my-packs", method = RequestMethod.GET)
     public ModelAndView packList(HttpServletRequest request) {
-        User user = userDao.findByEmail(request.getUserPrincipal().getName());
-        List<Pack> packList = packDao.findByUser(user);
+        List<Pack> packList = packDao.findByUsername(request.getUserPrincipal().getName());
         ModelAndView model = new ModelAndView("my-packs");
         model.addObject("packList", packList);
         return model;
-    }
-
-    @RequestMapping(value = "/create-pack", method = RequestMethod.GET)
-    public String packUploadPage() {
-        return "create-pack";
-    }
-
-    @RequestMapping(value = "/upload", method = RequestMethod.POST)
-    public ModelAndView createPack(HttpServletRequest request) {
-        Action action = Actionfactory.getAction(request);
-        return action.execute();
     }
 
     @RequestMapping(value = "/form", method = RequestMethod.GET)
     public ModelAndView generateForm(HttpServletRequest request) {
         Action action = Actionfactory.getAction(request);
         return action.execute();
+    }
+
+    private final String FILEPATH = "D:\\tmp2\\upload\\";
+
+    @RequestMapping(method = RequestMethod.GET, value = "/create-pack")
+    public String provideUploadInfo(Model model) {
+        File rootFolder = new File(FILEPATH);
+        List<String> fileNames = Arrays.stream(rootFolder.listFiles())
+                .map(f -> f.getName())
+                .collect(Collectors.toList());
+
+        model.addAttribute("files",
+                Arrays.stream(rootFolder.listFiles())
+                        .sorted(Comparator.comparingLong(f -> -1 * f.lastModified()))
+                        .map(f -> f.getName())
+                        .collect(Collectors.toList())
+        );
+
+        return "create-pack";
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/create-pack")
+    public String handleFileUpload(@RequestParam(value = "name") String name,
+                                   @RequestParam("file") List<MultipartFile> file,
+                                   RedirectAttributes redirectAttributes) {
+        if (name.contains("/")) {
+            redirectAttributes.addFlashAttribute("message", "Folder separators not allowed");
+            return "redirect:create-pack";
+        }
+        if (name.contains("/")) {
+            redirectAttributes.addFlashAttribute("message", "Relative pathnames not allowed");
+            return "redirect:create-pack";
+        }
+
+        if (!file.isEmpty()) {
+            try {
+                UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+                String username = userDetails.getUsername();
+                Pack pack = packDao.insert(new Pack(name, FILEPATH, username));
+                for (MultipartFile multipartFile : file) {
+                    BufferedOutputStream stream = new BufferedOutputStream(
+                            new FileOutputStream(new File(FILEPATH + multipartFile.getOriginalFilename())));
+                    FileCopyUtils.copy(multipartFile.getInputStream(), stream);
+                    stream.close();
+                    Document document = new Document();
+                    document.setName(multipartFile.getOriginalFilename());
+                    document.setPack(pack);
+                    documentDao.insert(document);
+                    redirectAttributes.addFlashAttribute("message",
+                            "You successfully uploaded " + name + "!");
+                }
+            }
+            catch (Exception e) {
+                redirectAttributes.addFlashAttribute("message",
+                        "You failed to upload " + name + " => " + e.getMessage());
+            }
+        }
+        else {
+            redirectAttributes.addFlashAttribute("message",
+                    "You failed to upload " + name + " because the file was empty");
+        }
+
+        return "redirect:create-pack";
     }
 }

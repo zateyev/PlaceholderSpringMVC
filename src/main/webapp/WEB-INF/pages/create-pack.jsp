@@ -3,6 +3,7 @@
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <c:set var="language"
        value="${not empty param.language ? param.language : not empty language ? language : pageContext.request.locale}"
        scope="session"/>
@@ -43,11 +44,18 @@
     </div>
 
     <div class="jumbotron clearfix">
-        <form method="POST" action="/upload" enctype="multipart/form-data">
-            <input name="packname" type="text" placeholder="pack name">
-            <input type="file" name="files" id="file" multiple="multiple"/>
-            <button class="btn btn-lg btn-success pull-right"><fmt:message key="pack.submit"/></button>
+
+
+        <form method="POST" enctype="multipart/form-data" action="/create-pack?${_csrf.parameterName}=${_csrf.token}">
+            <table>
+                <tr><td>File to upload:</td><td><input type="file" name="file" multiple="multiple" /></td></tr>
+                <tr><td>Name:</td><td><input type="text" name="name" /></td></tr>
+                <tr><td></td><td><input type="submit" value="Upload" /></td></tr>
+            </table>
+
         </form>
+
+
     </div>
 
     <%@include file="footer.jspf" %>

@@ -3,10 +3,16 @@ package com.epam.webtest.domain;
 import java.util.List;
 
 public class Pack extends BaseEntity {
+    String location;
+    String username;
     private String name;
     private List<Document> documents;
-    String location;
-    User user;
+
+    public Pack(String name, String location, String username) {
+        this.name = name;
+        this.location = location;
+        this.username = username;
+    }
 
     public Pack() {
     }
@@ -14,6 +20,14 @@ public class Pack extends BaseEntity {
     public Pack(String name, List<Document> documents) {
         this.name = name;
         this.documents = documents;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getName() {
@@ -38,13 +52,5 @@ public class Pack extends BaseEntity {
 
     public void setLocation(String location) {
         this.location = location;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 }
