@@ -29,6 +29,7 @@
         document.getElementById("logoutForm").submit();
     }
 </script>
+
 <div class="container">
     <div class="header">
         <ul class="nav nav-pills pull-right">
@@ -43,6 +44,7 @@
     </div>
 
     <h3>Мои пакеты</h3>
+
     <table class="table">
         <tr>
             <th>Пакет</th>
@@ -51,14 +53,20 @@
         </tr>
         <tbody>
         <c:forEach items="${packList}" var="pack">
-            <tr>
-                <td>${pack.name}</td>
-                <td><a href="${pageContext.request.contextPath}/form?packid=${pack.id}">Заполнить</a></td>
-                <td><a href="${pageContext.request.contextPath}/remove?packid=${pack.id}">Удалить</a></td>
-            </tr>
+            <form method="POST" action="/form?${_csrf.parameterName}=${_csrf.token}">
+                <tr>
+                    <td>${pack.name}</td>
+                    <td>
+                        <input type="hidden" name="packId" value="${pack.id}">
+                        <input type="submit" value="Заполнить"/>
+                    </td>
+                        <%--<td><a href="${pageContext.request.contextPath}/remove?packid=${pack.id}">Удалить</a></td>--%>
+                </tr>
+            </form>
         </c:forEach>
         </tbody>
     </table>
+
 
     <%@include file="footer.jspf" %>
 </div>

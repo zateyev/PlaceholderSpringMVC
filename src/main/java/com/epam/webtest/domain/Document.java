@@ -3,18 +3,19 @@ package com.epam.webtest.domain;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 
 public class Document extends BaseEntity {
     private XWPFDocument xwpfDocument;
     private String name;
     Pack pack;
 
-    public Document() {
-    }
-
-    public Document(XWPFDocument xwpfDocument, String name) {
-        this.xwpfDocument = xwpfDocument;
+    public Document(String name, Pack pack) throws IOException {
         this.name = name;
+        this.pack = pack;
+        this.xwpfDocument = new XWPFDocument(new FileInputStream(pack.getLocation() + name));
     }
 
     public XWPFDocument getXwpfDocument() {

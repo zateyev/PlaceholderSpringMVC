@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
 import javax.sql.DataSource;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -31,16 +32,16 @@ public class JdbcDocumentDao implements DocumentDao {
     @Override
     public List<Document> findByPack(Pack pack) {
         String sql = "SELECT id, name FROM document WHERE pack_id=" + pack.getId();
-        List<Document> documents = jdbcTemplate.query(sql, new RowMapper<Document>() {
-            @Override
-            public Document mapRow(ResultSet resultSet, int i) throws SQLException {
-                Document document = new Document();
-                document.setId(resultSet.getLong("id"));
-                document.setPack(pack);
-                return document;
+        return jdbcTemplate.query(sql, (resultSet, i) -> {
+            Document document = null;
+            try {
+                document = new Document(resultSet.getString("name"), pack);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
+            document.setId(resultSet.getLong("id"));
+            return document;
         });
-        return documents;
     }
 
     @Override

@@ -14,7 +14,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Formed documents</title>
     <link rel="stylesheet" href="webjars/bootstrap/3.3.2/dist/css/bootstrap.min.css"/>
-    <link rel="stylesheet" href="../../static/jumbotron-narrow.css"/>
+    <link rel="stylesheet" href="static/jumbotron-narrow.css"/>
 </head>
 <body style="zoom: 1;">
 <div class="container">
@@ -39,7 +39,6 @@
             <th></th>
         </tr>
         <tbody>
-        <jsp:useBean id="pack" scope="session" type="kz.zateyev.pdformation.entity.Pack"/>
         <c:forEach items="${pack.documents}" var="document">
             <tr>
                 <td>${document.name}</td>

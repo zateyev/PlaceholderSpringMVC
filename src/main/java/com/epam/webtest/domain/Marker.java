@@ -2,6 +2,8 @@ package com.epam.webtest.domain;
 
 import org.apache.poi.xwpf.usermodel.*;
 
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -58,9 +60,10 @@ public class Marker {
 
     public Set<Tag> getTags(Pack pack) {
         Set<Tag> tags = new HashSet<Tag>();
-        for (Document document : pack.getDocuments()) {
+        pack.getDocuments().forEach(document -> tags.addAll(getTags(document)));
+        /*for (Document document : pack.getDocuments()) {
             tags.addAll(getTags(document));
-        }
+        }*/
         return tags;
     }
 }

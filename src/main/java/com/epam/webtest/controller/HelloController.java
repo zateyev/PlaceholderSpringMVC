@@ -1,11 +1,11 @@
 package com.epam.webtest.controller;
 
-import com.epam.webtest.controller.action.Action;
-import com.epam.webtest.controller.action.Actionfactory;
 import com.epam.webtest.dao.DocumentDao;
 import com.epam.webtest.dao.PackDao;
 import com.epam.webtest.domain.Document;
+import com.epam.webtest.domain.Marker;
 import com.epam.webtest.domain.Pack;
+import com.epam.webtest.domain.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,6 +28,7 @@ import java.io.FileOutputStream;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Controller
@@ -92,17 +93,31 @@ public class HelloController {
     }
 
     @RequestMapping(value = "/my-packs", method = RequestMethod.GET)
-    public ModelAndView packList(HttpServletRequest request) {
-        List<Pack> packList = packDao.findByUsername(request.getUserPrincipal().getName());
+    public ModelAndView packList() {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = userDetails.getUsername();
+        List<Pack> packList = packDao.findByUsername(username);
         ModelAndView model = new ModelAndView("my-packs");
         model.addObject("packList", packList);
         return model;
     }
 
-    @RequestMapping(value = "/form", method = RequestMethod.GET)
+    /*@RequestMapping(value = "/form", method = RequestMethod.GET)
     public ModelAndView generateForm(HttpServletRequest request) {
         Action action = Actionfactory.getAction(request);
         return action.execute();
+    }*/
+
+    @RequestMapping(value = "/form", method = RequestMethod.POST)
+    public ModelAndView generateForm(@RequestParam(value = "packId") Long packId) {
+        Pack pack = packDao.findById(packId);
+        List<Document> documents = documentDao.findByPack(pack);
+        pack.setDocuments(documents);
+        Marker marker = new Marker();
+        Set<Tag> tags = marker.getTags(pack);
+        ModelAndView model = new ModelAndView("generated-form");
+        model.addObject("tags", tags);
+        return model;
     }
 
     private final String FILEPATH = "D:\\tmp2\\upload\\";
@@ -147,13 +162,12 @@ public class HelloController {
                             new FileOutputStream(new File(FILEPATH + multipartFile.getOriginalFilename())));
                     FileCopyUtils.copy(multipartFile.getInputStream(), stream);
                     stream.close();
-                    Document document = new Document();
-                    document.setName(multipartFile.getOriginalFilename());
-                    document.setPack(pack);
+                    Document document = new Document(multipartFile.getOriginalFilename(), pack);
                     documentDao.insert(document);
                     redirectAttributes.addFlashAttribute("message",
                             "You successfully uploaded " + name + "!");
                 }
+                return "my-packs";
             }
             catch (Exception e) {
                 redirectAttributes.addFlashAttribute("message",

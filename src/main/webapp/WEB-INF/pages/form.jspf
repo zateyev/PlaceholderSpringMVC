@@ -1,13 +1,12 @@
 <%@ page contentType="text/html; charset=UTF-8" language="java" %>
 <div class="jumbotron clearfix">
-    <h2><fmt:message key="form.title" /></h2>
+    <h2><fmt:message key="form.title"/></h2>
     <form action="${pageContext.request.contextPath}/filler" method="post" class="form">
         <div class="col-lg-12">
-            <jsp:useBean id="tags" scope="session" type="java.util.Set"/>
             <c:forEach items="${tags}" var="tag">
                 <input name="${tag.name}" type="text" placeholder="${tag.name}">
             </c:forEach>
-            <button class="btn btn-lg btn-success pull-right"><fmt:message key="form.submit" /></button>
+            <button class="btn btn-lg btn-success pull-right"><fmt:message key="form.submit"/></button>
         </div>
     </form>
 </div>
