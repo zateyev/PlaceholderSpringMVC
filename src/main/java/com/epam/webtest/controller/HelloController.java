@@ -2,10 +2,7 @@ package com.epam.webtest.controller;
 
 import com.epam.webtest.dao.DocumentDao;
 import com.epam.webtest.dao.PackDao;
-import com.epam.webtest.domain.Document;
-import com.epam.webtest.domain.Marker;
-import com.epam.webtest.domain.Pack;
-import com.epam.webtest.domain.Tag;
+import com.epam.webtest.domain.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -14,24 +11,19 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.FileCopyUtils;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.servlet.http.HttpServletRequest;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
+@SessionAttributes("pack")
 public class HelloController {
 
     @Autowired
@@ -102,22 +94,30 @@ public class HelloController {
         return model;
     }
 
-    /*@RequestMapping(value = "/form", method = RequestMethod.GET)
-    public ModelAndView generateForm(HttpServletRequest request) {
-        Action action = Actionfactory.getAction(request);
-        return action.execute();
-    }*/
-
     @RequestMapping(value = "/form", method = RequestMethod.POST)
-    public ModelAndView generateForm(@RequestParam(value = "packId") Long packId) {
+    public ModelAndView generateForm(@RequestParam(value = "packId") Long packId, Model model) {
         Pack pack = packDao.findById(packId);
         List<Document> documents = documentDao.findByPack(pack);
         pack.setDocuments(documents);
         Marker marker = new Marker();
         Set<Tag> tags = marker.getTags(pack);
-        ModelAndView model = new ModelAndView("generated-form");
-        model.addObject("tags", tags);
-        return model;
+        ModelAndView modelAndView = new ModelAndView("generated-form");
+        modelAndView.addObject("tags", tags);
+        if (!model.containsAttribute("pack")) {
+            model.addAttribute(pack);
+        }
+        return modelAndView;
+    }
+
+    @RequestMapping(value = "/fill", method = RequestMethod.POST)
+    public String fillDocument(@RequestParam Map<String, String> requestParams, @ModelAttribute("pack") Pack pack) {
+        Marker marker = new Marker();
+        Set<Tag> tags = marker.getTags(pack);
+        Map<String, String> map = new HashMap<>();
+        tags.forEach(tag -> map.put("{" + tag.getName() + "}", requestParams.get(tag.getName())));
+        Replacer replacer = new Replacer(map);
+        replacer.insertReplacers(pack);
+        return "formed-document";
     }
 
     private final String FILEPATH = "D:\\tmp2\\upload\\";

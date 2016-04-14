@@ -3,12 +3,9 @@ package com.epam.webtest.dao;
 import com.epam.webtest.domain.Document;
 import com.epam.webtest.domain.Pack;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 
 import javax.sql.DataSource;
 import java.io.IOException;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 
 public class JdbcDocumentDao implements DocumentDao {

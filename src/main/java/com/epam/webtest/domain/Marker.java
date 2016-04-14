@@ -2,8 +2,6 @@ package com.epam.webtest.domain;
 
 import org.apache.poi.xwpf.usermodel.*;
 
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
