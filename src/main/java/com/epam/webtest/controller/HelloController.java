@@ -16,9 +16,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -94,7 +93,7 @@ public class HelloController {
         return model;
     }
 
-    @RequestMapping(value = "/form", method = RequestMethod.POST)
+    @RequestMapping(value = "/form", method = RequestMethod.GET)
     public ModelAndView generateForm(@RequestParam(value = "packId") Long packId, Model model) {
         Pack pack = packDao.findById(packId);
         List<Document> documents = documentDao.findByPack(pack);
@@ -109,6 +108,15 @@ public class HelloController {
         return modelAndView;
     }
 
+    @RequestMapping(value = "/remove", method = RequestMethod.GET)
+    public String deletePack(@RequestParam(value = "packId") Long packId) {
+        Pack pack = packDao.findById(packId);
+        List<Document> documents = documentDao.findByPack(pack);
+        documents.forEach(Document::delete);
+        packDao.removeById(packId);
+        return "redirect:my-packs";
+    }
+
     @RequestMapping(value = "/fill", method = RequestMethod.POST)
     public String fillDocument(@RequestParam Map<String, String> requestParams, @ModelAttribute("pack") Pack pack) {
         Marker marker = new Marker();
@@ -118,6 +126,28 @@ public class HelloController {
         Replacer replacer = new Replacer(map);
         replacer.insertReplacers(pack);
         return "formed-document";
+    }
+
+    @RequestMapping(value = "/files", method = RequestMethod.GET)
+    public void getFile(
+            @RequestParam(value = "fileName") String fileName,
+            @ModelAttribute("pack") Pack pack,
+            HttpServletResponse response) {
+        String fileType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+        response.setContentType(fileType);
+        response.setHeader("Content-Disposition", "attachment; filename=" + fileName);
+        ResourceBundle resourceBundle = ResourceBundle.getBundle("app");
+        String filePath = resourceBundle.getString("formed.document.location");
+        File file = new File(filePath + fileName);
+        response.setContentLength((int) file.length());
+        try {
+            FileInputStream is = new FileInputStream(file);
+            org.apache.commons.io.IOUtils.copy(is, response.getOutputStream());
+            response.flushBuffer();
+        } catch (IOException ex) {
+            throw new RuntimeException("IOError writing file to output stream");
+        }
+
     }
 
     private final String FILEPATH = "D:\\tmp2\\upload\\";

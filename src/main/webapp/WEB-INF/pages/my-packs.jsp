@@ -53,16 +53,11 @@
         </tr>
         <tbody>
         <c:forEach items="${packList}" var="pack">
-            <form method="POST" action="/form?${_csrf.parameterName}=${_csrf.token}">
-                <tr>
-                    <td>${pack.name}</td>
-                    <td>
-                        <input type="hidden" name="packId" value="${pack.id}">
-                        <input type="submit" value="Заполнить"/>
-                    </td>
-                        <%--<td><a href="${pageContext.request.contextPath}/remove?packid=${pack.id}">Удалить</a></td>--%>
-                </tr>
-            </form>
+            <tr>
+                <td>${pack.name}</td>
+                <td><a href="/form?packId=${pack.id}">Заполнить</a></td>
+                <td><a href="/remove?packId=${pack.id}">Удалить</a></td>
+            </tr>
         </c:forEach>
         </tbody>
     </table>

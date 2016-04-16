@@ -3,9 +3,11 @@
 
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
-<c:set var="language" value="${not empty param.language ? param.language : not empty language ? language : pageContext.request.locale}" scope="session" />
-<fmt:setLocale value="${language}" />
-<fmt:setBundle basename="i18n" />
+<c:set var="language"
+       value="${not empty param.language ? param.language : not empty language ? language : pageContext.request.locale}"
+       scope="session"/>
+<fmt:setLocale value="${language}"/>
+<fmt:setBundle basename="i18n"/>
 
 <!DOCTYPE html>
 <html>
@@ -17,19 +19,27 @@
     <link rel="stylesheet" href="static/jumbotron-narrow.css"/>
 </head>
 <body style="zoom: 1;">
+<c:url value="/j_spring_security_logout" var="logoutUrl"/>
+<form action="${logoutUrl}" method="post" id="logoutForm">
+    <input type="hidden" name="${_csrf.parameterName}"
+           value="${_csrf.token}"/>
+</form>
+<script>
+    function formSubmit() {
+        document.getElementById("logoutForm").submit();
+    }
+</script>
 <div class="container">
     <div class="header">
         <ul class="nav nav-pills pull-right">
-            <li><a href="my-packs.jsp"><span class="glyphicon glyphicon-home"></span> Главная</a></li>
-            <li><a href="#">${user.firstName}</a></li>
+            <li><a href="/my-packs"><span class="glyphicon glyphicon-home"></span> Главная</a></li>
+            <li><a href="#">${pageContext.request.userPrincipal.name}</a></li>
             <li><a href="create-pack.jsp">Создать пакет</a></li>
             <li>
-                <form method="get" action="${pageContext.request.contextPath}/logout">
-                    <button class="btn btn-default navbar-btn">Выйти</button>
-                </form>
+                <button class="btn btn-default navbar-btn"><a href="javascript:formSubmit()"> Выйти</a></button>
             </li>
         </ul>
-        <h1 class="text-muted"><fmt:message key="project.name" /></h1>
+        <h1 class="text-muted"><fmt:message key="project.name"/></h1>
     </div>
 
     <h3>Сформированные документы</h3>
@@ -42,7 +52,7 @@
         <c:forEach items="${pack.documents}" var="document">
             <tr>
                 <td>${document.name}</td>
-                <td><a href="${pageContext.request.contextPath}/download?filename=${document.name}">Скачать</a></td>
+                <td><a href="/files?fileName=${document.name}">Скачать</a></td>
             </tr>
         </c:forEach>
         </tbody>

@@ -2,6 +2,7 @@ package com.epam.webtest.dao;
 
 
 import com.epam.webtest.domain.Pack;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
@@ -17,6 +18,9 @@ import java.util.List;
 public class JdbcPackDao implements PackDao {
 
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private DocumentDao documentDao;
 
     public JdbcPackDao(DataSource dataSource) {
         jdbcTemplate = new JdbcTemplate(dataSource);
@@ -98,6 +102,7 @@ public class JdbcPackDao implements PackDao {
 
     @Override
     public void removeById(Long id) {
+        documentDao.removeByPackId(id);
         String sql = "DELETE FROM pack WHERE id=?";
         jdbcTemplate.update(sql, id);
     }
